@@ -9,7 +9,7 @@ import nest_asyncio
 from starlette.responses import JSONResponse
 import asyncio
 from exceptions_handlers import *
-
+import json
 # Function to clear CUDA cache
 def clear_cuda_cache():
     if torch.cuda.is_available():
@@ -81,10 +81,11 @@ async def templates_stream(template_image: UploadFile = File(...)):
         
         image_bytes = await template_image.read()
         res = await template_controller.handle_template_stream(image_bytes)
+        response_dict = json.loads(res)
         # Clear cache after inference
         clear_cuda_cache()
         print(res)
-        return {"response": res, "status_code":200}
+        return {"response": response_dict, "status_code":200}
     except Exception as e:
         logger.error(f"Template stream processing error: {str(e)}")
         raise TemplateProcessingError(str(e))
@@ -104,11 +105,12 @@ async def langchain_stream(
         if "OpenAI" in res:
                     
                     res = res.replace("OpenAI", "ReNoteAI")
+        response_dict = json.loads(res)
 
         print(res)
         # Clear cache after inference
         clear_cuda_cache()
-        return JSONResponse(content={"response": res, "status_code":200}, status_code=200)
+        return JSONResponse(content={"response": response_dict, "status_code":200}, status_code=200)
     except Exception as e:
         logger.error(f"LangChain processing error: {str(e)}")
         raise LangChainProcessingError(str(e))
