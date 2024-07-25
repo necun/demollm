@@ -83,7 +83,7 @@ async def templates_stream(template_image: UploadFile = File(...)):
         res = await template_controller.handle_template_stream(image_bytes)
         # Clear cache after inference
         clear_cuda_cache()
-        return JSONResponse(content={"response": res, "status_code":200}, status_code=200)
+        return {"response": res, "status_code":200}
     except Exception as e:
         logger.error(f"Template stream processing error: {str(e)}")
         raise TemplateProcessingError(str(e))
